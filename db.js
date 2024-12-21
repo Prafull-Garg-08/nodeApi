@@ -13,8 +13,8 @@ async function createClient() {
   const token = await getToken();
 
   const client = new Client({
-    user: 'testvm', // Your PostgreSQL user
-    host: 'auth0.postgres.database.azure.com',
+    user: 'authid', // Your PostgreSQL user
+    host: 'authprivate.postgres.database.azure.com',
     database: 'postgres',
     password: token, // Use the token as the password
     port: 5432,
