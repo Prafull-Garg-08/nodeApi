@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  list: 'dev,master'
+  list: '[dev,master]'
 
 jobs:
   git:
