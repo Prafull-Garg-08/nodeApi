@@ -11,6 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: print if branch correct
-        if: contains(${{env.list}}, github.ref)
+        if: contains(${{env.list}}, github.ref_name)
         run: echo ${{github.ref}}
   
