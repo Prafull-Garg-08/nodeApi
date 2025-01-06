@@ -16,7 +16,7 @@ jobs:
             ls -al
       - name: Upload Docker image artifact
         run: |
-          docker save your-registry.azurecr.io/${{ github.repository }}:${{ github.sha }} | gzip > image.tar.gz
+          docker save my-image-name:$(date +%s) | gzip > image.tar.gz
       - uses: actions/upload-artifact@v3
         with:
           name: docker-image
@@ -32,8 +32,8 @@ jobs:
           name: docker-image
 
       - name: Call Trivy Scan Workflow
-        uses: ./.github/workflows/trivy-scan.yml
+        uses: ./.github/workflows/trivy.yml
         with:
-          docker_image: your-registry.azurecr.io/${{ github.repository }}:${{ github.sha }}
+          docker_image: my-image-name:$(date +%s)
 
           
