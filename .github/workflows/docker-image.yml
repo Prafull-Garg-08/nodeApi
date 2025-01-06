@@ -5,10 +5,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  checkout:
     runs-on: ubuntu-latest
     steps:
     - run:  echo ${{runner.os}}
     - uses: actions/checkout@v4
+  build:
+    runs-on: ubuntu-latest
+    steps:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
