@@ -8,7 +8,7 @@ env:
   
 jobs:
   git:
-    runs-on: linux-latest
+    runs-on: ubuntu-latest
     steps:
       - name: print if branch correct
         if: contains(${{env.list}}, github.ref)
