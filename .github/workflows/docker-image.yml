@@ -1,39 +1,16 @@
-name: Docker Image CI
+name : testing 
 
-on:
+on: 
   push:
-  workflow_dispatch:
+
+env:
+  list: 'dev , master'
+  
 jobs:
- build-docker:
-    runs-on: ubuntu-latest
+  git:
+    runs-on: linux-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-      - run: |
-            pwd
-            ls -al
-      - name: Upload Docker image artifact
-        run: |
-          docker save my-image-name:$(date +%s) | gzip > image.tar.gz
-      - uses: actions/upload-artifact@v3
-        with:
-          name: docker-image
-          path: image.tar.gz
- scan-docker:
-    runs-on: ubuntu-latest
-    needs: build-docker
-
-    steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
-
-      - name: Call Trivy Scan Workflow
-        uses: ./.github/workflows/trivy.yml
-        with:
-          docker_image: my-image-name:$(date +%s)
-
-          
+      - name: print if branch correct
+        if: contains(${{env.list}}, github.ref)
+        run: echo ${{github.ref}}
+  
