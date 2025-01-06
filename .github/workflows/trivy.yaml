@@ -1,0 +1,72 @@
+name: Trivy Scan
+
+on:
+  workflow_call:
+    inputs:
+      docker_image:
+        required: true
+        type: string
+        description: The Docker image to scan
+
+jobs:
+  scan-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Set up cache for Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-cache-${{ runner.os }}
+          restore-keys: |
+            trivy-db-cache-${{ runner.os }}-
+            trivy-db-cache-
+
+      - name: Update Trivy DB
+        run: |
+          if [ ! -f ~/.cache/trivy/db.sqlite ]; then
+            while true; do
+              trivy --cache-dir ~/.cache/trivy image --download-db-only && break || {
+                echo "Failed to download the Trivy DB, retrying in 5 seconds..."
+                sleep 5
+              }
+            done
+          fi
+
+      - name: Check Trivy cache
+        run: |
+          if [ -f ~/.cache/trivy/db.sqlite ]; then
+            echo "Cached DB found.";
+          else
+            echo "No cached DB found.";
+          fi
+
+      - name: Run Trivy vulnerability scanner with cached DB
+        env:
+          TRIVY_CACHE_DIR: ~/.cache/trivy
+        run: |
+          if [ ! -f ~/.cache/trivy/db.sqlite ]; then
+            echo "Trivy DB not found. Downloading..."
+            while true; do
+              trivy --cache-dir $TRIVY_CACHE_DIR image --download-db-only && break || {
+                echo "Failed to download the Trivy DB, retrying in 5 seconds..."
+                sleep 5
+              }
+            done
+          fi
+
+          echo "Running Trivy scan on the image..."
+          while true; do
+            trivy image --cache-dir $TRIVY_CACHE_DIR --severity CRITICAL,HIGH ${{ inputs.docker_image }} --debug && break || {
+              echo "Trivy scan failed, retrying in 5 seconds..."
+              sleep 5
+            }
+          done
