@@ -16,13 +16,10 @@ app.get('/', (request, response) => {
 })
 
 
-app.get('/users', db.getUsers)
-app.get('/users/:id', db.getUserById)
+app.get('/users', db.getUsers) //localhost:3000/users
 app.post('/users', db.createUser)
-app.put('/users/:id', db.updateUser)
-app.delete('/users/:id', db.deleteUser)
 
-// New endpoint to create the 'users' table
+// endpoint to create the 'users' table
 app.post('/create-table', db.createTable);
 
 
